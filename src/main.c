@@ -9,7 +9,6 @@
 #endif
 
 int main(const int argc, const char ** argv) {
-  const clock_t time = clock();
   if (argc <= 1) {
     printf("No input!\n");
     return 0;
@@ -18,9 +17,14 @@ int main(const int argc, const char ** argv) {
   if (base > 16) {
     printf("Base is too large!\n");
   }
+  const clock_t time = clock();
   // silences a warning in GCC about uint64_t being unsigned long
   const unsigned long long num_of_values = rc_all_no_repeating_digits(base);
   const long double seconds = ((long double)(clock() - time)) / CLOCKS_PER_SEC;
-  printf("%llu values given with a base of %d, calculated in %Lf seconds.\n", num_of_values, +base, seconds);
+  printf("%llu values given with a base of %d, calculated in %Lf seconds.\n"
+         "The time recorded may be inaccurate. On POSIX systems, use the `time` command for a more accurate time.\n",
+         num_of_values,
+         +base,
+         seconds);
   return 0;
 }

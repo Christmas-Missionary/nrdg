@@ -57,7 +57,7 @@ static inline char * valtostr(uint64_t val, char rdst[static 2], uint8_t base) {
   assert((base <= HIGHEST_BASE) && "uint64 doesn't support bases greater than 16!");
   assert(val && "Zero is never counted!");
   assert(*(rdst + 1) == 0 && "Byte after rdst is not null! This pointer it not the end!");
-  for (uint8_t counter = 0; counter < (BUFFER_SIZE - 1) && val; counter++, rdst--, val /= base) {
+  for (uint8_t counter = 0; val && counter < (BUFFER_SIZE - 1); counter++, rdst--, val /= base) {
     *rdst = valtochar(val % base);
   }
   if (val) {
@@ -79,13 +79,11 @@ static inline uint64_t powi(const uint8_t base, const uint8_t exp) {
   return res;
 }
 
-// 1. Add one
-// 2. If there is a conflict, add 1 to lowest place-value digit
 static inline bool increment_repeating_digit(uint64_t * const val_ptr, const uint8_t base) {
+  uint64_t val_copy = (*val_ptr) + 1;
   uint8_t read_order[HIGHEST_BASE];
   uint32_t bitmap = 0;
-  uint64_t val_copy = (*val_ptr) + 1;
-  for (uint8_t read_size = 0; val_copy && read_size < HIGHEST_BASE; read_size++) {
+  for (uint8_t read_size = 0; val_copy && read_size <= base; read_size++) {
     const uint8_t digit = val_copy % base;
     const uint32_t reader = 1U << digit;
     if (bitmap & reader) {
@@ -106,13 +104,72 @@ static inline bool increment_repeating_digit(uint64_t * const val_ptr, const uin
   return false;
 }
 
+// 203987 -> 204000
+// Example: (2439876, 10) returns 4, the place-value to round to, as in (10 ** 4), 123 returns 255 for "none found".
+// Example: (2439876, 10) returns 2450136
+// static inline bool round_and_set_nrd_number(uint64_t * const val, const uint8_t base) {
+//   const uint8_t digit = *val % base;
+//   if (digit == (base - 1)) {
+//     return false;
+//   }
+//   uint64_t disposable = *val;
+//   disposable /= base;
+//   uint8_t place_value = 0;
+//   for (uint8_t suspected = digit + 1; suspected < base; suspected++, place_value++) {
+//     if (disposable % base != suspected) {
+//       return false;
+//     }
+//     disposable /= base;
+//   }
+//   disposable = *val;
+//   uint64_t scaler = powi(base, place_value);
+//   uint64_t res = disposable / scaler; // starts as the left side, will round up at `is_repeating`
+//   while (increment_repeating_digit(&res, base)) {
+//   }
+
+//   uint32_t bitmap = 0;
+//   {
+//     uint64_t left_now = res;
+//     for (uint8_t read_size = 0; disposable && read_size <= base; read_size++) {
+//       bitmap |= (1U << (left_now % base));
+//       left_now /= base;
+//     }
+//   }
+//   res *= scaler;
+//   scaler /= base;
+//   for (uint8_t i = 0; scaler && i < base; i++) {
+//     if (!(bitmap & (1U << i))) {
+//       res += (scaler * i);
+//       scaler /= base;
+//     }
+//   }
+//   *val = res;
+//   return true;
+// }
+
+/*
+1.
+If there is a conflict, add 1 to lowest place-value digit
+65250 -> 65260 -> 65270
+2.
+If there is a descending order from 9 to the first digit,
+round to the place after the 9, increment that place if it conflicts with others on left,
+then place smallest available digits going right
+2439876 -> 2440000 -> 2450000  -> 2450136
+X.
+If amount of digits = value of base, permutations thing?
+Something faster than increment lowest to-repeat place-value?
+987654301
+*/
 static inline uint64_t next_nrd_number(uint64_t curr, const uint8_t base) {
   assert(base > 3 && "Someone tampered with the switch statement in `all_no_repeating_digits`!");
   assert((base <= HIGHEST_BASE) && "uint64 doesn't support bases greater than 16!");
   assert(curr && "Zero is never counted!");
-  if (curr >= last_nre(base)) {
-    return -1ULL;
-  }
+  assert(curr < last_nre(base) && "This is the last number!");
+  // No speed-up
+  //   if (round_and_set_nrd_number(&curr, base)) {
+  //     return curr;
+  //   }
   while (increment_repeating_digit(&curr, base)) {
   }
   return curr;
@@ -143,12 +200,15 @@ uint64_t rc_all_no_repeating_digits(const uint8_t base) {
   }
   assert((base <= HIGHEST_BASE) && "uint64 doesn't support bases greater than 16!");
   assert(base > 3 && "Someone tampered with the switch statement above!");
-  uint64_t number_of_values = 0;
+  uint64_t num_of_vals = 0;
   char to_print[BUFFER_SIZE];
-  to_print[BUFFER_SIZE - 1] = 0;
   char * const end_ptr = to_print + HIGHEST_BASE - 1;
-  for (uint64_t i = 1; i != -1ULL; i = next_nrd_number(i, base), number_of_values++) {
-    puts(valtostr(i, end_ptr, base));
+  to_print[HIGHEST_BASE] = 0;
+  const uint64_t last_num = last_nre(base);
+  uint64_t cur_val = 1;
+  for (; cur_val < last_num; cur_val = next_nrd_number(cur_val, base), num_of_vals++) {
+    puts(valtostr(cur_val, end_ptr, base));
   }
-  return number_of_values;
+  puts(valtostr(cur_val, end_ptr, base));
+  return num_of_vals + 1;
 }
