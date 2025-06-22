@@ -146,7 +146,9 @@ ipch/
 *.e2e
 
 # Other
-*.sh
+d.sh
+r.sh
+s.sh
 a
 todo
 .vscode
