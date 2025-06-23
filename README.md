@@ -10,18 +10,12 @@ I recommend looking at `next_nrd_number` and `increment_repeating_digit`.
 
 **Linux + Macos (Unix)**
 
-`nrd $ cc -Wall -Wextra -Wpedantic -O3 src/main.c src/nrd.c -o nrd`  
+`nrdg $ cc -Wall -Wextra -Wpedantic -O3 src/main.c src/nrd.c -o nrdg`  
 
 
 # Todo
 
 Make program go faster yet still be right  
-Generate only a section of numbers for paste-bin  
-- Input starting point, then go for how many times  
-- Example: `$ nrd 10 --start 1260345 --for 900`  
-
-`--help, -h` and `--version, -v`
-
 Fix internal timing of program  
 Command and args for windows MSVC
 
