@@ -1,4 +1,4 @@
-#include "nrd.h"
+#include "nrdg.h"
 // #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -132,7 +132,7 @@ int main(const int argc, const char ** const argv) {
   }
   const clock_t time = clock();
   const uint64_t num_of_values =
-    rc_all_no_repeating_digits(base, start, num_of_iters, custom_last_num ? custom_last_num : last_nre(base));
+    nrdg_all_no_repeating_digits(base, start, num_of_iters, custom_last_num ? custom_last_num : last_nre(base));
   const long double seconds = ((long double)(clock() - time)) / CLOCKS_PER_SEC;
   printf("%llu value%s given with a base of %d, calculated in %Lf seconds.\n"
          "The time recorded may be inaccurate. On POSIX systems, use the `time` command for a more accurate time.\n",

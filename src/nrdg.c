@@ -1,4 +1,4 @@
-#include "../src/nrd.h"
+#include "../src/nrdg.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -86,10 +86,10 @@ static inline uint64_t next_nrd_number(uint64_t curr, const uint8_t base) {
 
 // Input: unsigned int denoting base.
 // Output: Printing of all numbers with non-repeating digits + value representing amount of numbers printed.
-uint64_t rc_all_no_repeating_digits(const uint8_t base,
-                                    uint64_t start,
-                                    const uint64_t num_of_iters,
-                                    const uint64_t last_num) {
+uint64_t nrdg_all_no_repeating_digits(const uint8_t base,
+                                      uint64_t start,
+                                      const uint64_t num_of_iters,
+                                      const uint64_t last_num) {
   if (base == 0) {
     puts("A base of zero outputs nothing!");
     return 0;
