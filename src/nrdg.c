@@ -6,11 +6,17 @@
 #define HIGHEST_BASE 16
 #define BUFFER_SIZE (HIGHEST_BASE + 1)
 
+// Amount of non-repeating-digit numbers are hard-coded.
+// Input: The remainder from 0 to 15
+// Output: The character from '0' to '9' and from 'A' to 'F'
 static inline char valtochar(const uint8_t rem) {
   assert(rem < 16 && "Remainder is at least 16!");
   return (char)(rem + '0' + (7 * (rem > 9)));
 }
 
+// Converts the val provided to the base.
+// Input: A value to convert, a base, and the 17-byte buffer to be written in reverse
+// Output: A pointer to the last char written, or the start of the string
 static inline char * valtostr(uint64_t val, char rdst[static 2], uint8_t base) {
   assert((base <= HIGHEST_BASE) && "uint64 doesn't support bases greater than 16!");
   assert(val && "Zero is never counted!");
@@ -26,6 +32,9 @@ static inline char * valtostr(uint64_t val, char rdst[static 2], uint8_t base) {
   return rdst;
 }
 
+// Simple ** function with base and exponent, faster than pow
+// Input: A base and an exponent, both up to 255
+// Output: The result
 static inline uint64_t powi(const uint8_t base, const uint8_t exp) {
   if (exp == 0) {
     return 1;
@@ -37,6 +46,9 @@ static inline uint64_t powi(const uint8_t base, const uint8_t exp) {
   return res;
 }
 
+// The "heart" of this program. Finds the first repeat, then increments the smallest digit of that repeat.
+// Input: Pointer to a val to mutate, and a base
+// Output: Boolean as to if the value still has repeating digits, nice for while-loops
 static inline bool increment_repeating_digit(uint64_t * const val_ptr, const uint8_t base) {
   uint64_t val_copy = (*val_ptr) + 1;
   uint8_t read_order[HIGHEST_BASE];
@@ -76,6 +88,11 @@ If amount of digits = value of base, permutations thing?
 Something faster than increment lowest to-repeat place-value?
 987654301
 */
+
+// The "ribcage" of this program. Returns the next* number of no-repeating-digits
+// Input: An unsigned 64 bit number and a base
+// Output: The next* number of no-repeating-digits
+// *Always works if input also has no repeating digits, and most of the time for numbers with repeating digits
 static inline uint64_t next_nrd_number(uint64_t curr, const uint8_t base) {
   assert((base <= HIGHEST_BASE) && "uint64 doesn't support bases greater than 16!");
   assert(curr && "Zero is never counted!");
@@ -84,22 +101,20 @@ static inline uint64_t next_nrd_number(uint64_t curr, const uint8_t base) {
   return curr;
 }
 
-// Input: unsigned int denoting base.
-// Output: Printing of all numbers with non-repeating digits + value representing amount of numbers printed.
 uint64_t nrdg_all_no_repeating_digits(const uint8_t base,
                                       uint64_t start,
                                       const uint64_t num_of_iters,
                                       const uint64_t last_num) {
   if (base == 0) {
-    puts("A base of zero outputs nothing!");
+    (void)puts("A base of zero outputs nothing!");
     return 0;
   }
   if (base == 1) {
-    puts("1");
+    (void)puts("1");
     return 1;
   }
   if (base > HIGHEST_BASE) {
-    puts("This program doesn't support bases greater than 16!");
+    (void)puts("This program doesn't support bases greater than 16!");
     return 0;
   }
 
